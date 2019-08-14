@@ -1,6 +1,8 @@
 import React,{ Component } from 'react';
 import { Form, Icon, Input, Button, message} from 'antd';
 import {reqLoad} from '../../api';
+import data from '../../utils/store';
+import { setItem} from '../../utils/storage';
 
 import logo from './logo.png';
 
@@ -67,8 +69,15 @@ class Login extends Component{
         const {username, password} = values;
         reqLoad(username,password)
           .then((response) => {
-            console.log(response);
-            message.success('登陆成功')
+            // console.log(response);
+            message.success('登陆成功');
+            //所以登录成功需要保存数据，先保存在内存中，在保存到本地，
+            data.user = response;
+            //response是对象，保存需要是字符串，所以先转化为字符串
+            setItem(response);
+            //跳转页面到admin
+            this.props.history.replace('/')
+            //但是有可能直接访问admin，需要判断，不能直接访问，需要先登录
           })
           .catch((error) => {
             message.error(error);

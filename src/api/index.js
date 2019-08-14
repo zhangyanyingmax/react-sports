@@ -6,3 +6,4 @@
 import axiosInstance  from './ajax';
 
 export const reqLoad = (username,password) => axiosInstance.post('/login',{username,password});
+
