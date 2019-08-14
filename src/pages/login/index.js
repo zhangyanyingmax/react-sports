@@ -4,7 +4,7 @@ import {reqLoad} from '../../api';
 import data from '../../utils/store';
 import { setItem} from '../../utils/storage';
 
-import logo from './logo.png';
+import logo from '../../assets/images/logo.png';
 
 import './index.less';
 //定义变量不能放在import上面，会报错
