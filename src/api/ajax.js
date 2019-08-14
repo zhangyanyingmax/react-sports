@@ -1,3 +1,10 @@
+/*
+  需求：
+    1. 开发环境使用 http://localhost:3000  生产环境使用 http://localhost:5000
+    2. 成功由then触发 失败由catch触发
+    3. 成功只需要成功的数据  失败只需要失败的错误信息(promise.reject只能返回.catch)
+ */
+
 import axios from 'axios';
 
 //判断是开发环境还是生产环境
