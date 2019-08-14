@@ -10,7 +10,7 @@
 * 本地仓库和远程仓库关联
   * git remote add origin xxx
 * 将本地代码提交到远程仓库保管
-  * git push -u origin aster
+  * git push -u origin master
 * 本地开发需要新建dev分支
   * git checkout -b dev
 * dev 开发完提交

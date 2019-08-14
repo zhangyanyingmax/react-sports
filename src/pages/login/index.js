@@ -1,6 +1,6 @@
 import React,{ Component } from 'react';
 import { Form, Icon, Input, Button, message} from 'antd';
-import axios from 'axios';
+import {reqLoad} from '../../api';
 
 import logo from './logo.png';
 
@@ -48,17 +48,31 @@ class Login extends Component{
       //error是校验的错误信息提示，当校验成功，值为null，判断校验成功，主要判断error是否有值
       if (!error){
         //校验成功，允许登录，发送请求
-        axios.post('http://localhost:3000/login',values)
+        /*axios.post('http://localhost:3000/login',values)
           .then((response) => {
             const result = response.data;
             if (result.status === 0){
               message.success('登录成功',1)
             }else{
-              message.error(result.msg,1)
+              message.error(result.msg,1);
+              //重置密码
+              this.props.form.resetFields(['password']);
             }
           })
           .catch((error) => {
-            message.error('登录失败，网络出现异常',1)
+            message.error('登录失败，网络出现异常',1);
+            //重置密码
+            this.props.form.resetFields(['password']);
+          })*/
+        const {username, password} = values;
+        reqLoad(username,password)
+          .then((response) => {
+            console.log(response);
+            message.success('登陆成功')
+          })
+          .catch((error) => {
+            message.error(error);
+            this.props.form.resetFields(['password'])
           })
 
       }
