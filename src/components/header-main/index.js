@@ -1,11 +1,94 @@
 import React,{ Component } from 'react'
 import { withRouter } from 'react-router-dom';
 import { Button, Modal, message} from 'antd';
+import dayjs from 'dayjs';
 import data from '../../utils/store';
 import { removeItem } from '../../utils/storage';
+import { menuList } from '../../config/menuConfig';
+import { reqWeather } from '../../api';
+
 import './index.less';
 
 class HeaderMain extends Component{
+
+  //初始化状态
+  constructor(){
+    super();
+    this.state = {
+      title: '',
+      time: this.getTime(),
+      weather: '晴',
+      dayPictureUrl: 'http://api.map.baidu.com/images/weather/day/qing.png'
+    }
+  }
+
+  //跳转获取title,因为初始化渲染和更新都要进行
+  static getDerivedStateFromProps(nextProps,prevState){
+    //获取地址
+    const path = nextProps.location.pathname;
+    if (path === '/'){
+      return {
+        title: '首页'
+      }
+    }
+
+    //遍历menulist
+    for (let i = 0; i <menuList.length ; i++) {
+      const menu = menuList[i];
+      if (menu.children){
+        //二级菜单
+        const children = menu.children;
+        for (let j = 0; j <children.length ; j++) {
+          const cMenu = children[j];
+          if (path === cMenu.key){
+            return {
+              title: cMenu.title
+            }
+          }
+        }
+      } else {
+        //一级菜单
+        if (path === menu.key){
+          return {
+            title: menu.title
+          }
+        }
+      }
+    }
+
+  }
+
+  //请求时间跟天气
+  componentDidMount(){
+    //请求时间
+    this.timer = setInterval(() => {
+      this.setState({
+        time: this.getTime()
+      })
+    },1000);
+
+    //请求天气
+    reqWeather('深圳')
+      .then((res) => {
+        message.success('请求天气成功',3);
+        // console.log(res);
+        this.setState(res)
+      })
+      .catch((error) => {
+        message.error(error,3);
+      })
+
+
+
+  }
+
+  //清除计时器
+  componentWillUnmount() {
+    clearInterval(this.timer)
+  }
+
+
+
 
   logOut = () => {
     Modal.confirm({
@@ -22,19 +105,22 @@ class HeaderMain extends Component{
     });
   };
 
+  //获取时间
+  getTime = () => dayjs(Date.now()).format('YYYY-MM-DD HH:mm:ss');
 
   render(){
+    const { title, time, weather, dayPictureUrl} = this.state;
     return <div className="header-main">
       <div className="header-main-top">
         <span>欢迎，{data.user.username}</span>
         <Button type="link" onClick={this.logOut}>退出</Button>
       </div>
       <div className="header-main-bottom">
-        <h3>首页</h3>
+        <h3>{title}</h3>
         <div>
-          <span>2019-08-16 09:43</span>
-          <img src="http://api.map.baidu.com/images/weather/day/qing.png" alt=""/>
-          <span>晴</span>
+          <span>{time}</span>
+          <img src={dayPictureUrl} alt=""/>
+          <span>{weather}</span>
         </div>
       </div>
     </div>
