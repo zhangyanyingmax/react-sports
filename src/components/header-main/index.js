@@ -87,12 +87,10 @@ class HeaderMain extends Component{
     clearInterval(this.timer)
   }
 
-
-
-
+  //退出登录
   logOut = () => {
     Modal.confirm({
-      title: '您确定要退出登陆吗?',
+      title: '您确定要退出登录吗?',
       okText: '确定',
       cancelText: '取消',
       onOk:() => {//对象里不能用=号
