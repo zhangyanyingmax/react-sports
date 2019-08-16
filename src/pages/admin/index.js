@@ -5,6 +5,7 @@ import { getItem} from '../../utils/storage';
 import { reqValidateUser} from '../../api';
 import { message, Spin,Layout } from 'antd';
 import LeftNav from '../../components/left-nav';
+import HeaderMain from '../../components/header-main';
 
 import logo from '../../assets/images/logo.png';
 import './index.less';
@@ -70,7 +71,7 @@ export default class Admin extends Component{
     //通过函数的返回值，判断，如果返回值为true，就渲染loading
     if(isLoading) return <Spin tip="loading" />;
 
-    //返回值为true，就渲染admin
+    //返回值为false，就渲染admin
     return (
       <Layout style={{ minHeight: '100vh' }}>
         <Sider collapsible collapsed={this.state.collapsed} onCollapse={this.onCollapse}>
@@ -82,8 +83,10 @@ export default class Admin extends Component{
           <LeftNav />
         </Sider>
         <Layout>
-          <Header style={{ background: '#fff', padding: 0 }} />
-          <Content style={{ margin: '0 16px' }}>
+          <Header style={{ background: '#fff', padding: 0 }}>
+            <HeaderMain />
+          </Header>
+          <Content style={{ margin: '65px 16px' }}>
             <div style={{ padding: 24, background: '#fff', minHeight: 360 }}>Bill is a cat.</div>
           </Content>
           <Footer style={{ textAlign: 'center' }}>Ant Design ©2018 Created by Ant UED</Footer>
