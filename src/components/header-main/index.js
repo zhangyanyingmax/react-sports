@@ -26,11 +26,11 @@ class HeaderMain extends Component{
   static getDerivedStateFromProps(nextProps,prevState){
     //获取地址
     const path = nextProps.location.pathname;
-    if (path === '/'){
+   /* if (path === '/'){
       return {
         title: '首页'
       }
-    }
+    }*/
 
     //遍历menulist
     for (let i = 0; i <menuList.length ; i++) {
@@ -54,6 +54,9 @@ class HeaderMain extends Component{
           }
         }
       }
+    }
+    return {
+      title: '首页'
     }
 
   }

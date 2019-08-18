@@ -8,9 +8,26 @@ class LeftNav extends Component{
 
   constructor(props){
     super(props);
-    this.selectKey = this.props.location.pathname;
-    this.menu = this.createMenu(this.selectKey);
+    // this.selectKey = this.props.location.pathname;
+    let { pathname } = this.props.location;
+    if (pathname.startsWith('/product')) {
+      pathname = '/product'
+    }
+    this.menu = this.createMenu(pathname);
+    this.state = {
+      selectKey: ''
+    }
   }
+
+  static getDerivedStateFromProps(nextProps) {
+    let { pathname } = nextProps.location;
+    if (pathname.startsWith('/product')) {
+      pathname = '/product'
+    }
+    return {
+      selectKey: pathname
+    }
+  };
 
   //根据后台数据遍历生成
   createItem = (item) => {
@@ -60,7 +77,9 @@ class LeftNav extends Component{
     * defaultOpenKeys：刷新默认还是展开菜单
     *
     * */
-    return <Menu theme="dark" defaultSelectedKeys={[this.selectKey]} defaultOpenKeys={[this.openKey]} mode="inline">
+
+    const { selectKey } = this.state;
+    return <Menu theme="dark" selectedKeys={[selectKey]} defaultOpenKeys={[this.openKey]} mode="inline">
       {
         this.menu
       }
