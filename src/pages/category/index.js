@@ -13,6 +13,7 @@ export default class Category extends Component{
     categories: [],
     category: {},
     subCategories: [],
+    subCategory: {},
     isShowAddCategories: false,
     isShowUpdateCategoryName: false,
     isShowSubCategory: false
@@ -43,9 +44,10 @@ export default class Category extends Component{
 
   showUpdateCategoryName =(category) => {
     return () => {
+      const key = category.parentId === 0 ? 'category' : 'subCategory';
       this.setState({
         isShowUpdateCategoryName: true,
-        category
+        [key] : category
       })
     }
   };
@@ -60,12 +62,18 @@ export default class Category extends Component{
         const { categoryName,parentId } = values;
         reqAddCategory(categoryName,parentId)
           .then((res) => {
+            message.success('添加分类成功')
             //请求成功，更新数据
             const key = +parentId !== 0 ? 'subCategories' : 'categories';
+            const { isShowSubCategory, category} = this.state;
+            //判断是否是在同一个二级分类
+            if (isShowSubCategory && parentId !== category._id){
+              return
+            }
             this.setState({
               [key]: [...this.state[key],res]
             });
-            message.success('添加分类成功')
+
           })
           .catch((error) => {
             message.error(error)
@@ -91,7 +99,9 @@ export default class Category extends Component{
     this.updateCategoryNameRef.current.validateFields((error,values) => {
       if (!error){
         const {categoryName} = values;
-        const categoryId = this.state.category._id;
+        const { isShowSubCategory} = this.state;
+        const key = isShowSubCategory? 'subCategory' : 'category';
+        const categoryId = this.state[key]._id;
         // console.log(values);
         reqUpdateCategoryName(categoryName,categoryId)
           .then((res) => {
@@ -209,7 +219,7 @@ export default class Category extends Component{
       }
 
     ];*/
-   const {categories, category, subCategories, isShowAddCategories, isShowUpdateCategoryName, isShowSubCategory} = this.state;
+   const {categories, category, subCategory, subCategories, isShowAddCategories, isShowUpdateCategoryName, isShowSubCategory} = this.state;
 
     return <Card title={isShowSubCategory ? <Fragment>
       <Button type="link" onClick={this.goback}>一级分类</Button> <Icon type="arrow-right" /> <span>{category.name}</span>
@@ -222,7 +232,7 @@ export default class Category extends Component{
           showQuickJumper: true,
           showSizeChanger: true,
           pageSizeOptions: ['3','6','9','12'],
-          defaultPageSize: 3
+          defaultPageSize: 3,
         }}
         rowKey="_id"
       />
@@ -245,7 +255,7 @@ export default class Category extends Component{
         cancelText="取消"
         width={300}
       >
-        <UpdateCategoryName category={category} ref={this.updateCategoryNameRef}/>
+        <UpdateCategoryName category={isShowSubCategory? subCategory : category} ref={this.updateCategoryNameRef}/>
       </Modal>
 
     </Card>

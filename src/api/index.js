@@ -54,3 +54,7 @@ export const reqGetProduct = (pageNum,pageSize) => axiosInstance.get('manage/pro
 
 //定义一个添加商品的方法
 export const reqAddProduct = ({categoryId, pCategoryId, desc, price, detail, name}) => axiosInstance.post('manage/product/add',{categoryId, pCategoryId, desc, price, detail, name})
+
+
+//定义一个搜索商品的方法
+export const reqSearchProduct = (options) => axiosInstance.get('manage/product/search',{ params: options});

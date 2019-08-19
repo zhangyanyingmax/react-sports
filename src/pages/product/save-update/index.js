@@ -10,7 +10,8 @@ const {Item} = Form;
 class SaveUpdate extends Component{
 
   state = {
-    options: []
+    options: [],
+    id: []
   };
 
   //获取的edidator的值
@@ -27,7 +28,7 @@ class SaveUpdate extends Component{
     e.preventDefault();
     //首先进行表单校验，校验成功发送请求
     this.props.form.validateFields((error,values) => {
-      console.log(error, values);
+      // console.log(error, values);
       const { name, desc, id, price, detail} = values;
       let pCategoryId, categoryId;
       if (id.length === 1){
@@ -40,6 +41,7 @@ class SaveUpdate extends Component{
       if (!error){
         reqAddProduct({name, desc, pCategoryId, categoryId, price, detail})
           .then((res) => {
+            console.log(res);
             message.success('添加商品成功',3);
             //跳转到index
             this.props.history.replace('/product/index');
@@ -47,28 +49,67 @@ class SaveUpdate extends Component{
           .catch((error) => {
             message.error(error,3)
           })
+
       }
     })
   };
 
 
-  //请求以及分类列表
+  //请求一级分类列表
   componentDidMount(){
-    reqGetCategories(0)
-      .then((res) => {
+    const promiseArr = [];
+    //一上来，请求以及分类
+    promiseArr.push(reqGetCategories(0));
+
+    const {state} = this.props.location;
+    if (state){
+      //判断是修改商品
+      if (+state.pCategoryId === 0){
+        //判断是一级分类
         this.setState({
-          options: res.map((category) => {
-            return {
-              label: category.name,
-              value: category._id,
-              isLeaf: false
-            }
-          })
+          id: [state.categoryId]
         })
+      } else{
+        //是二级分类，要请求二级分类
+        promiseArr.push(reqGetCategories(state.pCategoryId))
+      }
+    }
+
+    Promise.all(promiseArr)
+    .then((res) => {
+      const [ categories, subCategories ] = res;
+      this.setState({
+        options: categories.map((category) => {
+          const option = {
+            label: category.name,
+            value: category._id,
+            isLeaf: false
+          };
+          //判断是否有二级分类
+          if (subCategories && (category._id === state.pCategoryId)){
+            option.children = subCategories.map((subCategory) => {
+              return {
+                label: subCategory.name,
+                value: subCategory._id,
+              }
+            })
+          }
+          return option
+        }),
+        id: subCategories ? [state.pCategoryId, state.categoryId] : this.state.id
       })
-      .catch((error) => {
-        message.error(error,3)
-      })
+    })
+    .catch((error) => {
+      message.error('请求数据失败',3)
+    })
+
+
+
+
+
+
+
+
   };
 
   loadData = (selectedOptions) => {
@@ -112,12 +153,13 @@ class SaveUpdate extends Component{
 
   render(){
 
-    const { getFieldDecorator} = this.props.form;
+    const { form: {getFieldDecorator}, location: {state}} = this.props;
+    const isUpdateProduct = !!state;//负负得正，取两次反强行转化成布尔值
 
-    const { options} = this.state;
+    const { options, id} = this.state;
 
     return <Card title={<Fragment>
-      <Icon onClick={this.goback} type="arrow-left" /> 添加商品
+      <Icon onClick={this.goback} type="arrow-left" /> {isUpdateProduct ? '修改' : '添加'}商品
     </Fragment>}>
       <Form  labelCol={{span:3}} wrapperCol={{span:8}} onSubmit={this.submit}>
         <Item label="商品名称">
@@ -125,8 +167,9 @@ class SaveUpdate extends Component{
             'name',
             {
               rules: [
-                {required: true,message: '输入内容不能为空'}
-              ]
+                {required: true, message: '输入内容不能为空'}
+              ],
+              initialValue: isUpdateProduct? state.name : ''
             }
           )(
             <Input placeholder="请输入商品名称"/>
@@ -139,8 +182,9 @@ class SaveUpdate extends Component{
             'desc',
             {
               rules: [
-                {required: true,message: '输入内容不能为空'}
-              ]
+                {required: true, message: '输入内容不能为空'}
+              ],
+              initialValue: isUpdateProduct? state.desc : ''
             }
           )(
             <Input placeholder="请输入商品描述"/>
@@ -153,8 +197,9 @@ class SaveUpdate extends Component{
             'id',
             {
               rules: [
-                {required: true,message: '输入内容不能为空'}
-              ]
+                {required: true, message: '输入内容不能为空'}
+              ],
+              initialValue: id
             }
           )(
             <Cascader options={options} loadData={this.loadData} placeholder="please select"/>
@@ -166,10 +211,10 @@ class SaveUpdate extends Component{
           {getFieldDecorator(
             'price',
             {
-              initialValue: '1000',
               rules: [
-                {required: true,message: '输入内容不能为空'}
-              ]
+                {required: true, message: '输入内容不能为空'}
+              ],
+              initialValue: isUpdateProduct? state.price : ''
             }
           )(
             <InputNumber
@@ -186,7 +231,7 @@ class SaveUpdate extends Component{
             'detail',
             {
               rules: [
-                {required: true,message: '输入内容不能为空'}
+                {required: true, message: '输入内容不能为空'}
               ]
             }
           )(

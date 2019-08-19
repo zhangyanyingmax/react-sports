@@ -70,7 +70,7 @@ class LeftNav extends Component{
   };
 
   render(){
-    console.log('render()');
+    // console.log('render()');
     //menu在这里渲染是多次渲染，我们只需要渲染一次即可，则将生成菜单放在constructor
     /*
     * defaultSelectedKeys:刷新默认还是原来选中的菜单
