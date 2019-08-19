@@ -10,7 +10,8 @@ class Index extends Component{
 
   //初始化状态
   state = {
-    product: []
+    product: [],
+    total: 0
   };
 
   //分类列数据
@@ -52,11 +53,12 @@ class Index extends Component{
   ];
 
   //获取商品列表
-  componentDidMount() {
-    reqGetProduct(1,3)
+  getProduct = (pageNum, pageSize) => {
+    reqGetProduct(pageNum,pageSize)
       .then((res) => {
         this.setState({
-          product: res.list
+          product: res.list,
+          total: res.total
         })
       })
       .catch((error) => {
@@ -64,13 +66,17 @@ class Index extends Component{
       })
   };
 
+  componentDidMount() {
+    this.getProduct(1,3)
+  };
+
   addProduct = () => {
-    this.props.history.replace('/product/saveupdate');
+    this.props.history.push('/product/saveupdate');
   };
 
 
   render(){
-    const {product} = this.state;
+    const {product, total} = this.state;
     return <Card title={<Fragment> <Select value="1">
       <Option key="1" value="1">根据商品名称</Option>
       <Option key="2" value="2">根据商品描述</Option>
@@ -86,7 +92,9 @@ class Index extends Component{
           showQuickJumper: true,
           showSizeChanger: true,
           pageSizeOptions: ['3','6','9','12'],
-          defaultPageSize: 3
+          defaultPageSize: 3,
+          total,
+          onChange: this.getProduct
         }}
         rowKey="_id"
       />

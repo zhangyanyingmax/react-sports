@@ -51,3 +51,6 @@ export const reqGetProduct = (pageNum,pageSize) => axiosInstance.get('manage/pro
     pageSize
   }
   });
+
+//定义一个添加商品的方法
+export const reqAddProduct = ({categoryId, pCategoryId, desc, price, detail, name}) => axiosInstance.post('manage/product/add',{categoryId, pCategoryId, desc, price, detail, name})

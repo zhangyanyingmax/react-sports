@@ -1,6 +1,7 @@
 import React,{ Component, Fragment } from 'react';
 import { Card, Form, Input, Button, InputNumber, Icon, Cascader, message} from 'antd';
-import { reqGetCategories} from '../../../api';
+import { reqGetCategories, reqAddProduct} from '../../../api';
+import RichTextEditor from './rich-text-editor';
 
 import './index.less';
 
@@ -12,9 +13,42 @@ class SaveUpdate extends Component{
     options: []
   };
 
+  //获取的edidator的值
+  onEditorChange = (text) => {
+    this.props.form.setFields({
+      detail: {
+        value: text
+      }
+    })
+  };
+
+
   submit =(e) => {
     e.preventDefault();
-    this.props.history.replace('/product/index')
+    //首先进行表单校验，校验成功发送请求
+    this.props.form.validateFields((error,values) => {
+      console.log(error, values);
+      const { name, desc, id, price, detail} = values;
+      let pCategoryId, categoryId;
+      if (id.length === 1){
+        pCategoryId = 0;
+        categoryId = id[0];
+      } else {
+        pCategoryId = id[0];
+        categoryId = id[1];
+      }
+      if (!error){
+        reqAddProduct({name, desc, pCategoryId, categoryId, price, detail})
+          .then((res) => {
+            message.success('添加商品成功',3);
+            //跳转到index
+            this.props.history.replace('/product/index');
+          })
+          .catch((error) => {
+            message.error(error,3)
+          })
+      }
+    })
   };
 
 
@@ -68,54 +102,22 @@ class SaveUpdate extends Component{
       .catch((error) => {
         message.error(error,3)
       })
+  };
 
-
-
-
+  //点击箭头回到上一页
+  goback = () => {
+    this.props.history.push('/product/index')
   };
 
 
   render(){
-    /*const options = [
-      {
-        value: 'zhejiang',
-        label: 'Zhejiang',
-        children: [
-          {
-            value: 'hangzhou',
-            label: 'Hangzhou',
-            children: [
-              {
-                value: 'xihu',
-                label: 'West Lake',
-              },
-            ],
-          },
-        ],
-      },
-      {
-        value: 'jiangsu',
-        label: 'Jiangsu',
-        children: [
-          {
-            value: 'nanjing',
-            label: 'Nanjing',
-            children: [
-              {
-                value: 'zhonghuamen',
-                label: 'Zhong Hua Men',
-              },
-            ],
-          },
-        ],
-      },
-    ];*/
+
     const { getFieldDecorator} = this.props.form;
 
     const { options} = this.state;
 
     return <Card title={<Fragment>
-      <Icon type="arrow-left" /> 添加商品
+      <Icon onClick={this.goback} type="arrow-left" /> 添加商品
     </Fragment>}>
       <Form  labelCol={{span:3}} wrapperCol={{span:8}} onSubmit={this.submit}>
         <Item label="商品名称">
@@ -179,8 +181,18 @@ class SaveUpdate extends Component{
           )
           }
         </Item>
-        <Item label="商品详情">
-
+        <Item label="商品详情" wrapperCol={{span:20}}>
+          {getFieldDecorator(
+            'detail',
+            {
+              rules: [
+                {required: true,message: '输入内容不能为空'}
+              ]
+            }
+          )(
+            <RichTextEditor onEditorChange={this.onEditorChange} />
+          )
+          }
         </Item>
         <Button className="saveUpdate-btn" type="primary" htmlType="submit">提交</Button>
       </Form>
