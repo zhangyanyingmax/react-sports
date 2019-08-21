@@ -2,10 +2,12 @@ import React,{ Component } from 'react'
 import { withRouter } from 'react-router-dom';
 import { Button, Modal, message} from 'antd';
 import dayjs from 'dayjs';
-import data from '../../utils/store';
+import { connect } from 'react-redux';
+import { removeUser } from '../../redux/action-creators';
+// import data from '../../utils/store';
 import { removeItem } from '../../utils/storage';
 import { menuList } from '../../config/menuConfig';
-import { reqWeather } from '../../api';
+import { reqWeather } from '../../api/index';
 
 import './index.less';
 
@@ -98,7 +100,7 @@ class HeaderMain extends Component{
       cancelText: '取消',
       onOk:() => {//对象里不能用=号
         //先移除数据，再跳转到登录页面
-        data.user = {};
+        this.props.removeUser();
         removeItem();
         this.props.history.replace('/login');
         message.success('已退出登录')
@@ -113,7 +115,7 @@ class HeaderMain extends Component{
     const { title, time, weather, dayPictureUrl} = this.state;
     return <div className="header-main">
       <div className="header-main-top">
-        <span>欢迎，{data.user.username}</span>
+        <span>欢迎，{this.props.user.username}</span>
         <Button type="link" onClick={this.logOut}>退出</Button>
       </div>
       <div className="header-main-bottom">
@@ -129,4 +131,7 @@ class HeaderMain extends Component{
 }
 
 //使用withRouter高阶组件，使HeaderMain组件拥有三大属性
-export default withRouter(HeaderMain);
+export default connect(
+  (state) => ({ user: state.user}),
+  { removeUser}
+)(withRouter(HeaderMain));

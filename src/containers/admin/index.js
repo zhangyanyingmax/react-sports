@@ -1,17 +1,19 @@
 import React,{ Component } from 'react';
 import { Link, Route, Redirect, Switch} from 'react-router-dom';
 import { message, Spin,Layout } from 'antd';
+import { connect } from 'react-redux';
 
-import data from '../../utils/store';
+// import data from '../../utils/store';
+import { saveUser } from '../../redux/action-creators';
 import { getItem} from '../../utils/storage';
-import { reqValidateUser} from '../../api';
-import LeftNav from '../../components/left-nav';
-import HeaderMain from '../../components/header-main';
-import Home from '../../pages/home';
-import Category from '../../pages/category';
-import Product from '../../pages/product';
-import User from '../../pages/user';
-import Role from '../../pages/role';
+import { reqValidateUser} from '../../api/index';
+import LeftNav from '../left-nav/index';
+import HeaderMain from '../header-main/index';
+import Home from '../../pages/home/index';
+import Category from '../../pages/category/index';
+import Product from '../../pages/product/index';
+import User from '../../pages/user/index';
+import Role from '../../pages/role/index';
 import Bar from '../../pages/charts/bar';
 import Line from '../../pages/charts/line';
 import Pie from '../../pages/charts/pie';
@@ -22,7 +24,7 @@ import './index.less';
 const { Header, Content, Footer, Sider } = Layout;
 
 
-export default class Admin extends Component{
+class Admin extends Component{
 
   //初始化状态
   state = {
@@ -41,7 +43,7 @@ export default class Admin extends Component{
   };
 
   checkUserLogin = () => {
-    if (!data.user._id){
+    if (!this.props.user._id){
       //内存中没有，再判断本地
       const user = getItem();
       if (!user){
@@ -52,8 +54,8 @@ export default class Admin extends Component{
       //如果本地有，先验证信息是否合法
       reqValidateUser(user._id)
         .then(() => {
-          //验证通过，把数据存储到内存中
-          data.user = user;
+          //验证通过，把数据存储到redux中
+          this.props.saveUser(user);
           /*但是请求是异步代码，render方法中不会等待异步代码，请求还没响应，就已经渲染admin了，所以无法做验证，需要通过更改页面的状态来完成，为了render方法简洁明了，定义一个函数，render里面调用
           更新了状态，会重新渲染组件，重新进入render方法，重新调用checkUserLogin方法
            */
@@ -135,3 +137,8 @@ export default class Admin extends Component{
     );
   }
 }
+
+export default connect(
+  (state) => ({user: state.user}),
+  { saveUser }
+)(Admin);

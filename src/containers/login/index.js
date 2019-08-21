@@ -1,8 +1,11 @@
 import React,{ Component } from 'react';
+import { connect } from 'react-redux';
 import { Form, Icon, Input, Button, message} from 'antd';
-import {reqLoad} from '../../api';
-import data from '../../utils/store';
+import {reqLoad} from '../../api/index';
+// import data from '../../utils/store';
 import { setItem} from '../../utils/storage';
+
+import { saveUser } from '../../redux/action-creators';
 
 import logo from '../../assets/images/logo.png';
 
@@ -72,7 +75,7 @@ class Login extends Component{
             // console.log(response);
             message.success('登陆成功');
             //所以登录成功需要保存数据，先保存在内存中，在保存到本地，
-            data.user = response;
+            this.props.saveUser(response);
             //response是对象，保存需要是字符串，所以先转化为字符串
             setItem(response);
             //跳转页面到admin
@@ -142,4 +145,7 @@ class Login extends Component{
 
 //使用高阶组件，让login有form属性，可以进行表单校验
 //高阶组件，调用返回一个新组件
-export default Form.create()(Login);
+export default connect(
+  null,
+  { saveUser }
+)(Form.create()(Login));

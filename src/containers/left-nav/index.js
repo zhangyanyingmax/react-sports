@@ -1,8 +1,9 @@
 import React,{ Component } from 'react';
 import {Link, withRouter} from "react-router-dom";
 import {Icon, Menu} from "antd";
+import { connect } from 'react-redux';
 import { menuList} from '../../config/menuConfig';
-import data from '../../utils/store';
+// import data from '../../utils/store';
 const { SubMenu, Item } = Menu;
 
 class LeftNav extends Component{
@@ -15,7 +16,7 @@ class LeftNav extends Component{
       pathname = '/product'
     }
     //筛选menuList
-    const roleMenu = data.user.role.menus;
+    const roleMenu = this.props.user.role.menus;
     const menus = this.fillterMenu(menuList, roleMenu);
 
     this.menu = this.createMenu(pathname,menus);
@@ -113,4 +114,7 @@ class LeftNav extends Component{
 }
 
 //使用withRouter高阶组件，传入leftNav组件，使LeftNav组件具有路由组件的三大属性
-export default withRouter(LeftNav);
+export default connect(
+  (state) => ({user: state.user}),
+  null
+)(withRouter(LeftNav));
