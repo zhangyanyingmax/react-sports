@@ -1,6 +1,6 @@
 import React,{ Component, Fragment } from 'react';
 import { Card, Select, Input, Button, Icon, Table, message} from 'antd';
-import {reqGetCategories, reqGetProduct, reqSearchProduct} from '../../../api';
+import {reqGetCategories, reqGetProduct, reqSearchProduct, reqUpdateProductStatus} from '../../../api';
 import './index.less';
 
 const { Option } = Select;
@@ -38,9 +38,10 @@ export default class Index extends Component{
     {
       title: '状态',
       render: (product) => {
+        const {_id, status} = product;
         return <Fragment>
-          <Button type="primary">上架</Button>
-          &nbsp;&nbsp;&nbsp;已下架
+          <Button type="primary" onClick={this.updateProductStatus(_id, status)}>{status === 1 ? '上架' : '下架'}</Button>
+          &nbsp;&nbsp;&nbsp;{status === 1 ? '已上架' : '售罄'}
         </Fragment>
       }
     },
@@ -161,6 +162,29 @@ export default class Index extends Component{
       })
 
 
+  };
+
+  updateProductStatus = (productId, status) => {
+    return () => {
+      const newStatus = 3 - status;
+      reqUpdateProductStatus(productId, newStatus)
+        .then((res) => {
+          message.success('更新商品状态成功', 3);
+          this.setState({
+            product: this.state.product.map((product) => {
+              if (product._id === productId){
+                console.log(newStatus);
+                product.status = newStatus;
+              }
+              return product;
+            })
+          })
+        })
+        .catch((error) => {
+          console.log(error);
+          message.error('更新商品状态失败', 3)
+        })
+    }
   };
 
 

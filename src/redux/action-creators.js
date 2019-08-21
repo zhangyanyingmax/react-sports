@@ -20,14 +20,11 @@ export const getCategoriesAsync = (parentId) => {
   return (dispatch) => {
     reqGetCategories(parentId)
       .then((res) => {
-        console.log(1);
-        console.log(res);
         message.success('获取分类成功', 3);
         //更新状态数据
         dispatch(getCategories(res))
       })
       .catch(() => {
-        console.log(2);
         message.error('获取分类失败', 3)
       })
   }
