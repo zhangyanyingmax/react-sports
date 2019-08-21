@@ -1,9 +1,10 @@
 import React,{ Component } from 'react';
 import { Link, Route, Redirect, Switch} from 'react-router-dom';
+import { message, Spin,Layout } from 'antd';
+
 import data from '../../utils/store';
 import { getItem} from '../../utils/storage';
 import { reqValidateUser} from '../../api';
-import { message, Spin,Layout } from 'antd';
 import LeftNav from '../../components/left-nav';
 import HeaderMain from '../../components/header-main';
 import Home from '../../pages/home';
@@ -15,7 +16,6 @@ import Bar from '../../pages/charts/bar';
 import Line from '../../pages/charts/line';
 import Pie from '../../pages/charts/pie';
 
-
 import logo from '../../assets/images/logo.png';
 import './index.less';
 
@@ -26,9 +26,10 @@ export default class Admin extends Component{
 
   //初始化状态
   state = {
-    isLoading: true,
+    // isLoading: true,
     collapsed: false,
-    isDisplay: 'block'
+    isDisplay: 'block',
+    menus: []
   };
 
   onCollapse = collapsed => {
@@ -57,7 +58,8 @@ export default class Admin extends Component{
           更新了状态，会重新渲染组件，重新进入render方法，重新调用checkUserLogin方法
            */
           this.setState({
-            isLoading: false
+            // isLoading: false,
+            menus: user.role.menus
           })
         })
         .catch(() => {
@@ -81,12 +83,13 @@ export default class Admin extends Component{
     if(isLoading) return <Spin tip="loading" />;
 
     //返回值为false，就渲染admin
+    const { collapsed, menus, isDisplay } = this.state;
     return (
       <Layout style={{ minHeight: '100vh' }}>
-        <Sider collapsible collapsed={this.state.collapsed} onCollapse={this.onCollapse}>
+        <Sider collapsible collapsed={collapsed} onCollapse={this.onCollapse}>
           <Link to="/home" className="admin-logo">
             <img src={logo} alt="logo"/>
-            <h1 style={{display:this.state.isDisplay}}>硅谷后台</h1>
+            <h1 style={{display:isDisplay}}>硅谷后台</h1>
           </Link>
           {/*考虑到用户权限，需要将menu菜单动态生成，单独定义组件，非路由组件，定义在components*/}
           <LeftNav />
@@ -98,14 +101,30 @@ export default class Admin extends Component{
           <Content style={{ margin: '65px 16px' }}>
             <div style={{ padding: 24, background: '#fff', minHeight: 360 }}>
               <Switch>
-                <Route path="/home" component={Home}/>
-                <Route path="/category" component={Category}/>
-                <Route path="/product" component={Product}/>
-                <Route path="/user" component={User}/>
-                <Route path="/role" component={Role}/>
-                <Route path="/charts/bar" component={Bar}/>
-                <Route path="/charts/line" component={Line}/>
-                <Route path="/charts/pie" component={Pie}/>
+                {
+                  menus.map((menu, index) => {
+                    switch (menu) {
+                      case '/home' :
+                        return <Route key={index} path="/home" component={Home}/>;
+                      case '/category' :
+                        return <Route key={index} path="/category" component={Category}/>;
+                      case '/product' :
+                        return <Route key={index} path="/product" component={Product}/>;
+                      case '/user' :
+                        return <Route key={index} path="/user" component={User}/>;
+                      case '/role' :
+                        return <Route key={index} path="/role" component={Role}/>;
+                      case '/charts/bar' :
+                        return <Route key={index} path="/charts/bar" component={Bar}/>;
+                      case '/charts/line' :
+                        return <Route key={index} path="/charts/line" component={Line}/>;
+                      case '/charts/pie' :
+                        return <Route key={index} path="/charts/pie" component={Pie}/>;
+                      default:
+                        return null;
+                    }
+                  })
+                }
                 <Redirect to="/home" />
               </Switch>
             </div>

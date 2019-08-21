@@ -22,6 +22,26 @@ export default class Category extends Component{
   addCategoriesRef = React.createRef();
   updateCategoryNameRef = React.createRef();
 
+  //分类列数据
+  columns = [
+    {
+      title: '品类名称',
+      dataIndex: 'name',
+      // render: text => <a>{text}</a>,
+    },
+    {
+      title: '操作',
+      className: 'column-operation',
+      // dataIndex: 'operation',
+      render: (category) => <div>
+        <Button type="link" onClick={this.showUpdateCategoryName(category)}>修改品类名称</Button>
+        {
+          this.state.isShowSubCategory ? '' : <Button type="link" onClick={this.showSubcategory(category)}>查看其子品类</Button>
+        }
+      </div>
+    },
+  ];
+
   //请求以及分类数据
   componentDidMount(){
     reqGetCategories(0)
@@ -32,7 +52,7 @@ export default class Category extends Component{
         })
       })
       .catch((error) => {
-        message.success(error)
+        message.error(error)
       })
   }
 
@@ -149,10 +169,12 @@ export default class Category extends Component{
   //查看子品类
   showSubcategory = (category) => {
     return () => {
+      //请求二级分类，参数传id，一级分类id为0，二级分类id为category._id
       reqGetCategories(category._id)
         .then((res) => {
           message.success('请求二级分类成功',3);
           this.setState({
+            //更新状态
             subCategories: res,
             isShowSubCategory: true,
             category
@@ -174,51 +196,11 @@ export default class Category extends Component{
   };
 
 
-  //分类列数据
-  columns = [
-    {
-      title: '品类名称',
-      dataIndex: 'name',
-      // render: text => <a>{text}</a>,
-    },
-    {
-      title: '操作',
-      className: 'column-operation',
-      // dataIndex: 'operation',
-      render: (category) => <div>
-        <Button type="link" onClick={this.showUpdateCategoryName(category)}>修改品类名称</Button>
-        {
-          this.state.isShowSubCategory ? '' : <Button type="link" onClick={this.showSubcategory(category)}>查看其子品类</Button>
-        }
-      </div>
-    },
-  ];
+
 
   render(){
 
-   /* const data = [
-      {
-        key: '1',
-        name: '手机1',
-      },
-      {
-        key: '2',
-        name: '手机2',
-      },
-      {
-        key: '3',
-        name: '手机3',
-      },
-      {
-        key: '4',
-        name: '手机4',
-      },
-      {
-        key: '5',
-        name: '手机5',
-      }
 
-    ];*/
    const {categories, category, subCategory, subCategories, isShowAddCategories, isShowUpdateCategoryName, isShowSubCategory} = this.state;
 
     return <Card title={isShowSubCategory ? <Fragment>

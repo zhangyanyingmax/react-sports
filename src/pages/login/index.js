@@ -80,7 +80,7 @@ class Login extends Component{
             //但是有可能直接访问admin，需要判断，不能直接访问，需要先登录
           })
           .catch((error) => {
-            message.error(error);
+            message.error('登陆失败', 3);
             this.props.form.resetFields(['password'])
           })
 

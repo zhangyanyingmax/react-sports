@@ -55,6 +55,24 @@ export const reqGetProduct = (pageNum,pageSize) => axiosInstance.get('manage/pro
 //定义一个添加商品的方法
 export const reqAddProduct = ({categoryId, pCategoryId, desc, price, detail, name}) => axiosInstance.post('manage/product/add',{categoryId, pCategoryId, desc, price, detail, name})
 
+//定义一个更新商品的方法
+export const reqUpdateProduct = ({_id, categoryId, pCategoryId, desc, price, detail, name}) => axiosInstance.post('manage/product/update',{_id, categoryId, pCategoryId, desc, price, detail, name})
+
 
 //定义一个搜索商品的方法
 export const reqSearchProduct = (options) => axiosInstance.get('manage/product/search',{ params: options});
+
+//定义一个获取角色列表的方法
+export const reqGetRole = () => axiosInstance.get('/manage/role/list');
+
+//定义一个创建角色的方法
+export const reqAddRole = (name) => axiosInstance.post('manage/role/add',{name});
+
+//定义一个设置角色权限的方法
+export const reqUpdateRole = ({auth_name,menus,_id}) => axiosInstance.post('manage/role/update',{auth_name,menus,_id});
+
+//定义一个获取用户列表的方法
+export const reqGetUser = () => axiosInstance.get('/manage/user/list');
+
+//定义一个添加用户的方法
+export const reqAddUser = ({username, password, phone, email, role_id}) => axiosInstance.post('manage/user/add',{username, password, phone, email, role_id});

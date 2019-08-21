@@ -1,6 +1,6 @@
 import React,{ Component, Fragment } from 'react';
 import { Card, Form, Input, Button, InputNumber, Icon, Cascader, message} from 'antd';
-import { reqGetCategories, reqAddProduct} from '../../../api';
+import {reqGetCategories, reqAddProduct, reqUpdateProduct, reqGetProduct} from '../../../api';
 import RichTextEditor from './rich-text-editor';
 
 import './index.less';
@@ -27,19 +27,45 @@ class SaveUpdate extends Component{
   submit =(e) => {
     e.preventDefault();
     //首先进行表单校验，校验成功发送请求
-    this.props.form.validateFields((error,values) => {
-      // console.log(error, values);
-      const { name, desc, id, price, detail} = values;
-      let pCategoryId, categoryId;
-      if (id.length === 1){
-        pCategoryId = 0;
-        categoryId = id[0];
-      } else {
-        pCategoryId = id[0];
-        categoryId = id[1];
-      }
+    this.props.form.validateFields(async (error,values) => {
       if (!error){
-        reqAddProduct({name, desc, pCategoryId, categoryId, price, detail})
+        // console.log(error, values);
+        const { name, desc, id, price, detail} = values;
+
+        let pCategoryId, categoryId;
+        if (id.length === 1){
+          pCategoryId = 0;
+          categoryId = id[0];
+        } else {
+          pCategoryId = id[0];
+          categoryId = id[1];
+        }
+        let promise;
+        const {state} = this.props.location;
+        if (state){
+          console.log(1);
+          promise = reqUpdateProduct({ _id: state._id, name, desc, pCategoryId, categoryId, price, detail})
+        } else{
+          console.log(2);
+          promise = reqAddProduct({name, desc, pCategoryId, categoryId, price, detail})
+        }
+
+        promise
+          .then((res) => {
+            console.log(res);
+            message.success('添加商品成功',3);
+            //跳转到index
+            this.props.history.push('/product/index');
+          })
+          .catch((error) => {
+            message.error(error,3)
+          })
+      }
+
+
+
+
+        /*reqAddProduct({name, desc, pCategoryId, categoryId, price, detail})
           .then((res) => {
             console.log(res);
             message.success('添加商品成功',3);
@@ -50,10 +76,20 @@ class SaveUpdate extends Component{
             message.error(error,3)
           })
 
-      }
+        //修改商品
+        reqUpdateProduct({name, desc, pCategoryId, categoryId, price, detail})
+          .then((res) => {
+            console.log(res);
+            message.success('添加商品成功',3);
+            //跳转到index
+            this.props.history.replace('/product/index');
+          })
+          .catch((error) => {
+            message.error(error,3)
+          })*/
+
     })
   };
-
 
   //请求一级分类列表
   componentDidMount(){

@@ -23,7 +23,7 @@ class UpdateCategoryName extends Component{
   render(){
     const { form:{ getFieldDecorator}, category:{name} } = this.props;
     return <Form>
-      <Item label="修改名称">
+      <Item>
         {
           getFieldDecorator(
             'categoryName',

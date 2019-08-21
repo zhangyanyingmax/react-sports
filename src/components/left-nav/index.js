@@ -2,6 +2,7 @@ import React,{ Component } from 'react';
 import {Link, withRouter} from "react-router-dom";
 import {Icon, Menu} from "antd";
 import { menuList} from '../../config/menuConfig';
+import data from '../../utils/store';
 const { SubMenu, Item } = Menu;
 
 class LeftNav extends Component{
@@ -13,11 +14,35 @@ class LeftNav extends Component{
     if (pathname.startsWith('/product')) {
       pathname = '/product'
     }
-    this.menu = this.createMenu(pathname);
+    //筛选menuList
+    const roleMenu = data.user.role.menus;
+    const menus = this.fillterMenu(menuList, roleMenu);
+
+    this.menu = this.createMenu(pathname,menus);
     this.state = {
       selectKey: ''
     }
   }
+
+  //过滤menuList
+  fillterMenu = (menuList, roleMenu) => {
+    return menuList.reduce((prev,curr) => {
+      if (roleMenu.includes(curr.key)){
+        prev.push(curr)
+      } else {
+        if (curr.children){
+          const cMenu = curr.children.filter((cMenu) => roleMenu.includes(cMenu.key) );
+          if (cMenu.length){
+            cMenu.children = curr;
+            prev.push(curr)
+          }
+
+        }
+      }
+      return prev
+    },[])
+  };
+
 
   static getDerivedStateFromProps(nextProps) {
     let { pathname } = nextProps.location;
@@ -41,7 +66,7 @@ class LeftNav extends Component{
 
 
 
-  createMenu = (path) => {
+  createMenu = (path,menuList) => {
     return menuList.map((menu) => {
       //判断是一级菜单还是二级菜单
       if (menu.children){

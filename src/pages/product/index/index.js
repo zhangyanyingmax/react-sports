@@ -1,6 +1,6 @@
 import React,{ Component, Fragment } from 'react';
 import { Card, Select, Input, Button, Icon, Table, message} from 'antd';
-import { reqGetProduct, reqSearchProduct } from '../../../api';
+import {reqGetCategories, reqGetProduct, reqSearchProduct} from '../../../api';
 import './index.less';
 
 const { Option } = Select;
@@ -48,7 +48,7 @@ export default class Index extends Component{
       title: '状态',
       render: (product) => {
         return <Fragment>
-          <Button type="link">详情</Button>
+          <Button type="link" onClick={this.goProductDetail(product)}>详情</Button>
           <Button type="link" onClick={this.goUpdateProduct(product)}>修改</Button>
         </Fragment>
       }
@@ -56,9 +56,30 @@ export default class Index extends Component{
 
   ];
 
+  goProductDetail = (product) => {
+    return () => {
+      let state = { product };
+      if (product.pCategoryId !== '0'){
+        reqGetCategories(0)
+          .then((data) => {
+            console.log(data);
+            const {name} = data.find((item) => item._id === product.pCategoryId );
+            state.pName = name;
+            this.props.history.push('/product/detail', state)
+          })
+          .catch(() => {
+            message.error('访问失败', 3)
+          })
+      }
+    }
+  };
+
   goUpdateProduct = (product) => {
     return () => {
       this.props.history.push('/product/saveupdate', product)//需要将产品传过去才会有数据
+      this.setState({
+
+      })
     }
   };
 
