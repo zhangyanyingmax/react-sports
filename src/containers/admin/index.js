@@ -10,7 +10,7 @@ import { reqValidateUser} from '../../api/index';
 import LeftNav from '../left-nav/index';
 import HeaderMain from '../header-main/index';
 import Home from '../../pages/home/index';
-import Category from '../../pages/category/index';
+import Category from '../category/index';
 import Product from '../../pages/product/index';
 import User from '../../pages/user/index';
 import Role from '../../pages/role/index';

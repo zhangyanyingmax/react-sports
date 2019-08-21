@@ -1,16 +1,18 @@
 import React,{ Component, Fragment } from 'react';
 import { Card, Table, Button, Icon, Modal, message} from 'antd';
+import { connect } from 'react-redux';
 import AddCategories from './addCategories';
 import UpdateCategoryName from './updateCategoryName';
-import { reqGetCategories, reqAddCategory, reqUpdateCategoryName} from '../../api';
+import { reqGetCategories, reqAddCategory, reqUpdateCategoryName} from '../../api/index';
+import { getCategoriesAsync, addCategoryAsync, updateCategoryNameAsync } from '../../redux/action-creators';
 
 import './index.less';
 
-export default class Category extends Component{
+class Category extends Component{
 
   //初始化state
   state = {
-    categories: [],
+    // categories: [],
     category: {},
     subCategories: [],
     subCategory: {},
@@ -42,18 +44,9 @@ export default class Category extends Component{
     },
   ];
 
-  //请求以及分类数据
+  //请求一级分类数据
   componentDidMount(){
-    reqGetCategories(0)
-      .then((res) => {
-        //请求成功，更新数据状态
-        this.setState({
-          categories: res
-        })
-      })
-      .catch((error) => {
-        message.error(error)
-      })
+    this.props.getCategoriesAsync(0)
   }
 
   showAddCategories =() => {
@@ -63,8 +56,9 @@ export default class Category extends Component{
   };
 
   showUpdateCategoryName =(category) => {
+    console.log(category);
     return () => {
-      const key = category.parentId === 0 ? 'category' : 'subCategory';
+      const key = this.state.isShowSubCategory ? 'subCategory' : 'category';
       this.setState({
         isShowUpdateCategoryName: true,
         [key] : category
@@ -79,32 +73,37 @@ export default class Category extends Component{
     this.addCategoriesRef.current.validateFields((error,values) => {
       if (!error){
         //表单验证通过，发送请求
+        const { isShowSubCategory, category} = this.state;
         const { categoryName,parentId } = values;
-        reqAddCategory(categoryName,parentId)
-          .then((res) => {
-            message.success('添加分类成功')
-            //请求成功，更新数据
-            const key = +parentId !== 0 ? 'subCategories' : 'categories';
-            const { isShowSubCategory, category} = this.state;
-            //判断是否是在同一个二级分类
-            if (isShowSubCategory && parentId !== category._id){
-              return
-            }
-            this.setState({
-              [key]: [...this.state[key],res]
-            });
+        //判断是添加一级分类还是二级分类
+        if (!isShowSubCategory){
+          this.props.addCategoryAsync( parentId, categoryName );
+        } else {
+          reqAddCategory(parentId, categoryName)
+            .then((res) => {
+              message.success('添加分类成功')
+              //请求成功，更新数据
+              // const key = +parentId !== 0 ? 'subCategories' : 'categories';
 
-          })
-          .catch((error) => {
-            message.error(error)
-          })
-          .finally(() => {
-            //最后，不管成功失败都清空表单，隐藏弹框
-            this.setState({
-              isShowAddCategories: false
-            });
-            this.addCategoriesRef.current.resetFields()
-          })
+              //判断是否是在同一个二级分类
+              if (isShowSubCategory && parentId !== category._id){
+                return
+              }
+              this.setState({
+                subCategories: [...this.state.subCategories,res]
+              });
+
+            })
+            .catch((error) => {
+              message.error(error)
+            })
+        }
+        //最后，不管成功失败都清空表单，隐藏弹框
+        this.setState({
+          isShowAddCategories: false
+        });
+        this.addCategoriesRef.current.resetFields()
+
       }
     });
 
@@ -120,35 +119,39 @@ export default class Category extends Component{
       if (!error){
         const {categoryName} = values;
         const { isShowSubCategory} = this.state;
-        const key = isShowSubCategory? 'subCategory' : 'category';
-        const categoryId = this.state[key]._id;
-        // console.log(values);
-        reqUpdateCategoryName(categoryName,categoryId)
-          .then((res) => {
-            //请求成功，更新名称
-            message.success('修改名称成功',3);
-            const key = this.state.isShowSubCategory ? 'subCategories' : 'categories';
-            this.setState({
-              [key]: this.state[key].map((category) => {
-                if (category._id === categoryId){
-                  category.name = categoryName
-                }
-                // console.log(category);
-                return category;
+        if (!isShowSubCategory){
+          const categoryId = this.state.category._id;
+          this.props.updateCategoryNameAsync(categoryName, categoryId);
+        } else{
+          const categoryId = this.state.subCategory._id;
+          reqUpdateCategoryName(categoryName,categoryId)
+            .then((res) => {
+              //请求成功，更新名称
+              message.success('修改名称成功',3);
+              /*const key = this.state.isShowSubCategory ? 'subCategories' : 'categories';*/
+              this.setState({
+                subCategories: this.state.subCategories.map((category) => {
+                  if (category._id === categoryId){
+                    category.name = categoryName
+                  }
+                  // console.log(category);
+                  return category;
 
+                })
               })
-            })
 
-          })
-          .catch((error) => {
-            message.error(error,3);
-          })
-          .finally(() => {
-            this.setState({
-              isShowUpdateCategoryName: false
-            });
-            this.updateCategoryNameRef.current.resetFields()
-          })
+            })
+            .catch((error) => {
+              message.error(error,3);
+            })
+        }
+        // const key = isShowSubCategory? 'subCategory' : 'category';
+        // console.log(values);
+        this.setState({
+          isShowUpdateCategoryName: false
+        });
+        this.updateCategoryNameRef.current.resetFields()
+
       }
     })
   };
@@ -201,7 +204,8 @@ export default class Category extends Component{
   render(){
 
 
-   const {categories, category, subCategory, subCategories, isShowAddCategories, isShowUpdateCategoryName, isShowSubCategory} = this.state;
+   const {category, subCategory, subCategories, isShowAddCategories, isShowUpdateCategoryName, isShowSubCategory} = this.state;
+   const {categories} = this.props;
 
     return <Card title={isShowSubCategory ? <Fragment>
       <Button type="link" onClick={this.goback}>一级分类</Button> <Icon type="arrow-right" /> <span>{category.name}</span>
@@ -243,3 +247,8 @@ export default class Category extends Component{
     </Card>
   }
 }
+
+export default connect(
+  (state) => ({categories: state.categories}),
+  {  getCategoriesAsync, addCategoryAsync, updateCategoryNameAsync  }
+)(Category);
